@@ -41,11 +41,11 @@ button:focus-visible, a:focus-visible { outline: 2px solid #6a9e87; outline-offs
 .setup-banner code { font-size: 11px; }
 .agent-chat.desktop-chat { flex: 1; min-height: 0; padding: 0; background: #fff; display: flex; --agent-chat-accent: #252b27; --agent-chat-accent-hover: #465047; --agent-chat-paper: #fff; }
 .desktop-chat .chat-card { display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; border: 0; border-radius: 0; box-shadow: none; background: #fff; }
-.desktop-chat .message-viewport { flex: 1; width: 100%; padding: 30px max(32px, calc((100% - 740px) / 2)) 40px; }
+.desktop-chat .message-viewport { flex: 1; width: 100%; padding: 30px max(32px, calc((100% - 740px) / 2)) 40px; scroll-behavior: auto; overflow-anchor: none; }
 .desktop-chat .composer-wrap { padding: 16px max(32px, calc((100% - 740px) / 2)) 20px; border: 0; background: #fff; }
 .desktop-chat .composer { min-height: 66px; padding: 12px 14px 12px 20px; border-radius: 20px; border-color: #e4e6e0; background: #f8f9f6; box-shadow: 0 3px 8px #1b382f03; }
 .desktop-chat .composer:focus-within { border-color: #bac6b4; box-shadow: 0 0 0 3px #91a7820c; }
-.desktop-chat .composer textarea { font-size: 15px; }
+.desktop-chat .composer textarea { font-size: 15px; max-height: 200px; overflow-y: auto; }
 .desktop-chat .send-button { border-radius: 50%; width: 34px; height: 34px; }
 .desktop-chat .composer-wrap > p { margin-top: 13px; font-size: 10px; color: #9ca294; }
 .desktop-chat .message-row { margin-bottom: 30px; gap: 16px; }

@@ -78,7 +78,7 @@ describe('Chat compound components', () => {
     expect(scrollTo).not.toHaveBeenCalled();
   });
 
-  it('follows appended transcript children only while the reader remains near the end', () => {
+  it('does not scroll when transcript footers or status content are appended', () => {
     const actions = surfaceActions();
     const messages = [assistantMessage('answer-1', 'Existing answer')];
     const { rerender } = render(
@@ -89,7 +89,7 @@ describe('Chat compound components', () => {
 
     rerender(<FollowContentChat messages={messages} actions={actions} showFooter showStatus={false} />);
     expect(screen.getByText('Suggested follow-up')).toBeInTheDocument();
-    expect(scrollTo).toHaveBeenCalledOnce();
+    expect(scrollTo).not.toHaveBeenCalled();
 
     Object.defineProperties(viewport, {
       scrollHeight: { configurable: true, value: 500 },
@@ -99,7 +99,39 @@ describe('Chat compound components', () => {
     fireEvent.scroll(viewport);
     rerender(<FollowContentChat messages={messages} actions={actions} showFooter showStatus />);
     expect(screen.getByRole('status')).toHaveTextContent('Recovery details');
-    expect(scrollTo).toHaveBeenCalledOnce();
+    expect(scrollTo).not.toHaveBeenCalled();
+  });
+
+  it('reveals a new user message but never scrolls for streaming text or completion', () => {
+    const actions = surfaceActions();
+    const user: UIMessage = { id: 'user-1', role: 'user', parts: [{ type: 'text', text: 'Question' }] };
+    const { rerender } = render(<ChatSurface messages={[user]} status="submitted" actions={actions} />);
+    const viewport = screen.getByRole('log');
+    const scrollTo = vi.spyOn(viewport, 'scrollTo');
+    Object.defineProperties(viewport, {
+      scrollHeight: { configurable: true, value: 900 },
+      clientHeight: { configurable: true, value: 300 },
+      scrollTop: { configurable: true, value: 600 },
+    });
+    for (const text of ['Start of answer', 'Start of answer with more streamed text']) {
+      rerender(<ChatSurface messages={[user, assistantMessage('answer-1', text)]} status="streaming" actions={actions} />);
+    }
+    rerender(<ChatSurface messages={[user, assistantMessage('answer-1', 'Finished answer')]} status="ready" actions={actions} />);
+    expect(scrollTo).not.toHaveBeenCalled();
+    rerender(<ChatSurface messages={[user, assistantMessage('answer-1', 'Finished answer'), { ...user, id: 'user-2' }]} status="submitted" actions={actions} />);
+    expect(scrollTo).toHaveBeenCalledExactlyOnceWith({ top: 900 });
+  });
+
+  it('grows the input to its content height and shrinks it when cleared', () => {
+    render(<ChatSurface messages={[]} status="ready" actions={surfaceActions()} />);
+    const input = screen.getByRole('textbox') as HTMLTextAreaElement;
+    let measuredHeight = 112;
+    Object.defineProperty(input, 'scrollHeight', { configurable: true, get: () => measuredHeight });
+    fireEvent.change(input, { target: { value: 'First line\nSecond line\nThird line\nFourth line' } });
+    expect(input.style.height).toBe('112px');
+    measuredHeight = 32;
+    fireEvent.change(input, { target: { value: '' } });
+    expect(input.style.height).toBe('32px');
   });
 
   it('honors a custom accessible transcript label', () => {

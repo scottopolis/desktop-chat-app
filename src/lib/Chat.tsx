@@ -14,6 +14,7 @@ import {
   useContext,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -131,15 +132,16 @@ const Transcript = forwardRef<HTMLDivElement, ChatTranscriptProps>(function Tran
   'aria-label': ariaLabel = 'Conversation messages',
   ...props
 }, forwardedRef) {
-  const { messages, status, busy } = useChatContext('Chat.Transcript');
+  const { messages, busy } = useChatContext('Chat.Transcript');
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const followMessagesRef = useRef(true);
+  const latestUserMessageId = messages.filter(message => message.role === 'user').at(-1)?.id;
 
   useEffect(() => {
     if (followMessagesRef.current) {
       viewportRef.current?.scrollTo({ top: viewportRef.current.scrollHeight });
     }
-  }, [children, messages, status]);
+  }, [latestUserMessageId]);
 
   return (
     <div
@@ -273,6 +275,14 @@ const Input = forwardRef<HTMLTextAreaElement, ChatInputProps>(function Input({
 }, ref) {
   const { draft, setDraft, inputId } = useComposerContext('Chat.Input');
   const resolvedId = id ?? inputId;
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useLayoutEffect(() => {
+    const input = inputRef.current;
+    if (!input) return;
+    input.style.height = 'auto';
+    input.style.height = `${input.scrollHeight}px`;
+  }, [draft]);
 
   function change(event: ChangeEvent<HTMLTextAreaElement>) {
     onChange?.(event);
@@ -292,7 +302,10 @@ const Input = forwardRef<HTMLTextAreaElement, ChatInputProps>(function Input({
       <textarea
         {...props}
         id={resolvedId}
-        ref={ref}
+        ref={(node) => {
+          inputRef.current = node;
+          setRef(ref, node);
+        }}
         data-agent-chat-composer=""
         rows={rows}
         value={draft}

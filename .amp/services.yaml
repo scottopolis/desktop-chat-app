@@ -1,6 +1,6 @@
 services:
   gridrise-chat:
-    command: npm run dev
+    command: ': "${SCOTT_ASSISTANT_KEY:?Set the workspace secret SCOTT_ASSISTANT_KEY}"; GRIDRISE_API_KEY="$SCOTT_ASSISTANT_KEY" npm run dev'
     port: 5173
     readiness:
       path: /
