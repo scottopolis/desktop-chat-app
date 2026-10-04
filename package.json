@@ -1,7 +1,7 @@
 {
-  "name": "@scottopolis/agent-widget",
+  "name": "gridrise-chat",
   "version": "0.1.0",
-  "private": false,
+  "private": true,
   "type": "module",
   "main": "./dist-lib/index.js",
   "types": "./dist-lib/index.d.ts",
@@ -22,11 +22,11 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "concurrently -k -n web,api,sandbox -c cyan,magenta,yellow \"npm run dev:web\" \"npm run dev:server\" \"npm run dev:sandbox\"",
-    "dev:web": "vite --host 0.0.0.0",
-    "dev:server": "tsx watch server/index.ts",
+    "dev": "concurrently -k -n web,api -c cyan,magenta \"npm run dev:web\" \"npm run dev:server\"",
+    "dev:web": "vite --host 127.0.0.1",
+    "dev:server": "tsx watch server/sessions.ts",
     "dev:sandbox": "tsx watch server/sandbox-server.ts",
-    "start:server": "node dist/server/index.js",
+    "start:server": "node dist/server/sessions.js",
     "start:sandbox": "node dist/server/sandbox-server.js",
     "build": "npm run typecheck && npm run build:lib && vite build && vite build --config vite.embed.config.ts && tsc -p server/tsconfig.json",
     "build:lib": "vite build --config vite.lib.config.ts && tsc -p tsconfig.lib.json",

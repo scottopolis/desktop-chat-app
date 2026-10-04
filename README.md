@@ -1,4 +1,63 @@
-# Agent Widget
+# Gridrise
+
+A standalone, light-theme desktop web app for chatting with agent
+`agent_bb34ddbfd404477ba07cb9267ad6899b`. Built from
+[agent-starter](https://github.com/scottopolis/agent-starter), with a new Gridrise
+Sessions API backend and WebSocket transport. No OpenAI key is needed.
+
+## Run locally
+
+Requires Node 22 or newer.
+
+```sh
+npm ci
+cp .env.gridrise.example .env
+# Set GRIDRISE_API_KEY in .env using your editor (never commit it).
+npm run dev
+```
+
+Open the local URL printed by Vite. Both services bind to loopback by default;
+there is no sign-in and this app must not be deployed publicly as-is.
+
+In **Gridrise → Account → API keys**, create a key bound to the agent above.
+Set `GRIDRISE_API_KEY` in the server `.env`, then restart `npm run dev`.
+The key is used only by the Node backend to call the production
+`POST /v1/agent-sessions?agentId=…` endpoint with `{"purpose":"api"}`.
+The browser receives only the short-lived session handoff and connects directly
+to the returned WebSocket. Keys and handoff credentials are never stored in chat history.
+
+Without a key, the app shows setup guidance. It does not pretend to answer with
+mock content. `GRIDRISE_APP_ORIGIN` optionally allows one exact alternate app
+origin for a private development preview; do not use a wildcard.
+
+## Chat history and limitations
+
+- The sidebar retains the 10 most recently used chats in this browser's localStorage.
+  Starting an empty chat does not evict an existing one until you send a message.
+- Titles come from the first message. Delete removes a local saved transcript;
+  it does not delete Gridrise's server-side conversation records.
+- Refresh restores the latest chat. Reopening a chat or renewing an expired
+  credential starts a fresh API interaction with the saved text context. This
+  preserves conversational text, not the original server interaction or tool state.
+- Streaming text, Markdown, Enter to send, Shift+Enter for a newline, Stop, and
+  retry are supported. Stop disconnects the stream; it does not guarantee that
+  server-side tools already running are canceled.
+- This version is text chat only: no uploads, voice, browser tools, or approval UI.
+  Agent-side tools may run, but their payloads are not displayed or persisted.
+- Transcripts are unencrypted browser-local data. Clearing site data removes them.
+  Use your own browser profile for personal conversations.
+
+```sh
+npm run build
+npm test
+```
+
+The original starter's reusable library and example source are retained below
+for reference. Their provider/MCP server is not part of `npm run dev` for Gridrise.
+
+---
+
+## Original starter reference: Agent Widget
 
 A reusable, provider-neutral React chat UI for standard AI SDK UI messages, plus a thin working example. Its compound components let applications compose a controlled chat from a few substantial pieces. `ChatSurface` and the `useChat`-powered `ChatWidget` remain ready-made presets built from those same pieces.
 
